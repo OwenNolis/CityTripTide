@@ -2,6 +2,7 @@
 A City Trip App that will guide you in your adventures.
 
 <hr>
+
 ## About CityTripTide
 CityTripTide is a mobile app designed to enhance your city trip experience. Discover and share interesting places such as restaurants, hotels, and attractions with other users during your travels.
 
