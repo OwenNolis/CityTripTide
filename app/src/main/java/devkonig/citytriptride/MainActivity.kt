@@ -1,4 +1,5 @@
 package devkonig.citytriptride
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,15 +24,18 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("signup") {
                         SignupScreen(
-                            onSignup = { email, password -> /* handle sign up */ },
+                            onSignup = { _, _ -> },
                             onNavigateToLogin = { navController.navigate("login") }
                         )
                     }
                     composable("login") {
                         LoginScreen(
-                            onLogin = { email, password -> /* handle login */ },
+                            onLoginSuccess = { navController.navigate("home") },
                             onNavigateToSignup = { navController.navigate("signup") }
                         )
+                    }
+                    composable("home") {
+                        HomeScreen()
                     }
                 }
             }
