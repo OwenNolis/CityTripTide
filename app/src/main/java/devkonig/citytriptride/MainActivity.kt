@@ -35,7 +35,10 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("home") {
-                        HomeScreen()
+                        HomeScreen(navController)
+                    }
+                    composable("addCity") {
+                        AddCityScreen(navController)
                     }
                 }
             }
