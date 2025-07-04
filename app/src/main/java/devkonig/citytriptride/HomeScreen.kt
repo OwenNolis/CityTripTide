@@ -1,9 +1,11 @@
 package devkonig.citytriptride
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,21 +16,25 @@ import coil.compose.rememberImagePainter
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import com.google.firebase.firestore.GeoPoint
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(navController: NavController) {
     var cities by remember { mutableStateOf<List<City>>(emptyList()) }
+    var currentPage by remember { mutableStateOf(0) }
+    val pageSize = 6
+    val pageCount = (cities.size + pageSize - 1) / pageSize
+    val pagedCities = cities.drop(currentPage * pageSize).take(pageSize)
 
-    // Fetch cities from Firestore
     LaunchedEffect(Unit) {
         FirebaseFirestore.getInstance()
             .collection("cities")
             .get()
             .addOnSuccessListener { result ->
-                val cityList = result.documents.mapNotNull { doc ->
-                    doc.toObject(City::class.java)
-                }
+                val cityList = result.documents
+                    .filter { it.id != "cityId" }
+                    .mapNotNull { doc -> doc.toObject(City::class.java) }
+                    .filter { it.name.isNotBlank() }
                 cities = cityList
             }
     }
@@ -45,29 +51,57 @@ fun HomeScreen(navController: NavController) {
                 style = MaterialTheme.typography.h4,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            LazyColumn {
-                items(cities) { city ->
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                contentPadding = PaddingValues(bottom = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(pagedCities) { city ->
                     Card(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
+                            .aspectRatio(1f),
                         elevation = 4.dp
                     ) {
                         Column(
-                            modifier = Modifier.padding(16.dp)
+                            modifier = Modifier.padding(8.dp)
                         ) {
                             Text(text = city.name, style = MaterialTheme.typography.h6)
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Image(
                                 painter = rememberImagePainter(city.imageUrl),
                                 contentDescription = city.name,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(180.dp)
+                                    .aspectRatio(1.5f)
                             )
                         }
                     }
                 }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = { if (currentPage > 0) currentPage-- },
+                    enabled = currentPage > 0
+                ) { Text("Previous") }
+
+                Text("Page ${currentPage + 1} of $pageCount")
+
+                Button(
+                    onClick = { if (currentPage < pageCount - 1) currentPage++ },
+                    enabled = currentPage < pageCount - 1
+                ) { Text("Next") }
             }
         }
 
