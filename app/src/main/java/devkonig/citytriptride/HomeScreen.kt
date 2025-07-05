@@ -39,79 +39,89 @@ fun HomeScreen(navController: NavController) {
             }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
+    Scaffold(
+        bottomBar = {
+            BottomNavBar(navController, currentRoute = "home")
+        }
+    ) { innerPadding ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(innerPadding)
         ) {
-            Text(
-                text = "CityTripTide",
-                style = MaterialTheme.typography.h4,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+            Column(
                 modifier = Modifier
-                    .weight(1f, fill = false)
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                contentPadding = PaddingValues(bottom = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .fillMaxSize()
+                    .padding(top = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                items(pagedCities) { city ->
-                    Card(
-                        modifier = Modifier
-                            .aspectRatio(1f),
-                        elevation = 4.dp
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(8.dp)
+                Text(
+                    text = "CityTripTide",
+                    style = MaterialTheme.typography.h4,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    contentPadding = PaddingValues(bottom = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(pagedCities) { city ->
+                        Card(
+                            modifier = Modifier
+                                .aspectRatio(1f),
+                            elevation = 4.dp
                         ) {
-                            Text(text = city.name, style = MaterialTheme.typography.h6)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Image(
-                                painter = rememberImagePainter(city.imageUrl),
-                                contentDescription = city.name,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(1.5f)
-                            )
+                            Column(
+                                modifier = Modifier.padding(8.dp)
+                            ) {
+                                Text(text = city.name, style = MaterialTheme.typography.h6)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Image(
+                                    painter = rememberImagePainter(city.imageUrl),
+                                    contentDescription = city.name,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(1.5f)
+                                )
+                            }
                         }
                     }
                 }
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp, horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = { if (currentPage > 0) currentPage-- },
+                        enabled = currentPage > 0
+                    ) { Text("Previous") }
+
+                    Text("Page ${currentPage + 1} of $pageCount")
+
+                    Button(
+                        onClick = { if (currentPage < pageCount - 1) currentPage++ },
+                        enabled = currentPage < pageCount - 1
+                    ) { Text("Next") }
+                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
+
+            FloatingActionButton(
+                onClick = { navController.navigate("addCity") },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
             ) {
-                Button(
-                    onClick = { if (currentPage > 0) currentPage-- },
-                    enabled = currentPage > 0
-                ) { Text("Previous") }
-
-                Text("Page ${currentPage + 1} of $pageCount")
-
-                Button(
-                    onClick = { if (currentPage < pageCount - 1) currentPage++ },
-                    enabled = currentPage < pageCount - 1
-                ) { Text("Next") }
+                Icon(Icons.Default.Add, contentDescription = "Add City")
             }
-        }
-
-        FloatingActionButton(
-            onClick = { navController.navigate("addCity") },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Add City")
         }
     }
 }
