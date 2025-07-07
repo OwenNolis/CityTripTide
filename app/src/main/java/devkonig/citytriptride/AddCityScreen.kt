@@ -83,12 +83,12 @@ fun AddCityScreen(navController: NavController) {
                         val lon = sightLongitude.toDoubleOrNull()
                         if (sightName.isNotBlank() && lat != null && lon != null) {
                             scope.launch {
-                                // 1. Local list check
-                                if (sights.any { it.name == sightName }) {
+                                // 1. Local list check (case-insensitive)
+                                if (sights.any { it.name.lowercase() == sightName.lowercase() }) {
                                     showSightDialog = true
                                     return@launch
                                 }
-                                // 2. If city exists, check in Firestore for this city's sights field
+                                // 2. If city exists, check in Firestore for this city's sights field (case-insensitive)
                                 val cityDocs = FirebaseFirestore.getInstance()
                                     .collection("cities")
                                     .whereEqualTo("name", name)
@@ -97,7 +97,7 @@ fun AddCityScreen(navController: NavController) {
                                 if (!cityDocs.isEmpty) {
                                     val cityData = cityDocs.documents[0].data
                                     val citySights = cityData?.get("sights") as? List<Map<String, Any>>
-                                    if (citySights != null && citySights.any { (it["name"] as? String) == sightName }) {
+                                    if (citySights != null && citySights.any { (it["name"] as? String)?.lowercase() == sightName.lowercase() }) {
                                         showSightDialog = true
                                         return@launch
                                     }
@@ -141,13 +141,12 @@ fun AddCityScreen(navController: NavController) {
                             isSaving = false
                             return@Button
                         }
-                        // Check if city exists
+                        // Check if city exists (case-insensitive)
                         FirebaseFirestore.getInstance()
                             .collection("cities")
-                            .whereEqualTo("name", name)
                             .get()
                             .addOnSuccessListener { documents ->
-                                if (!documents.isEmpty) {
+                                if (documents.any { (it.getString("name") ?: "").lowercase() == name.lowercase() }) {
                                     isSaving = false
                                     showDialog = true
                                 } else {
