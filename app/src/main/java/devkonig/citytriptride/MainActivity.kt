@@ -40,6 +40,15 @@ class MainActivity : ComponentActivity() {
                     composable("addCity") {
                         AddCityScreen(navController)
                     }
+                    composable("map") {
+                        MapScreen(navController)
+                    }
+                    composable("favorites") {
+                        FavoriteListScreen(navController)
+                    }
+                    composable("profile") {
+                        ProfileScreen(navController)
+                    }
                 }
             }
         }
