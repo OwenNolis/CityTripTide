@@ -13,6 +13,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun AddCityScreen(navController: NavController) {
@@ -24,6 +26,7 @@ fun AddCityScreen(navController: NavController) {
     var isSaving by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var showDialog by remember { mutableStateOf(false) }
+    var showSightDialog by remember { mutableStateOf(false) }
 
     // Sight form state
     var sightName by remember { mutableStateOf("") }
@@ -32,6 +35,8 @@ fun AddCityScreen(navController: NavController) {
     var sightLongitude by remember { mutableStateOf("") }
     var sightImageUrl by remember { mutableStateOf("") }
     var sights by remember { mutableStateOf(listOf<Sight>()) }
+
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -77,17 +82,39 @@ fun AddCityScreen(navController: NavController) {
                         val lat = sightLatitude.toDoubleOrNull()
                         val lon = sightLongitude.toDoubleOrNull()
                         if (sightName.isNotBlank() && lat != null && lon != null) {
-                            sights = sights + Sight(
-                                name = sightName,
-                                description = sightDescription,
-                                location = GeoPoint(lat, lon),
-                                imageUrl = sightImageUrl
-                            )
-                            sightName = ""
-                            sightDescription = ""
-                            sightLatitude = ""
-                            sightLongitude = ""
-                            sightImageUrl = ""
+                            scope.launch {
+                                // 1. Local list check
+                                if (sights.any { it.name == sightName }) {
+                                    showSightDialog = true
+                                    return@launch
+                                }
+                                // 2. If city exists, check in Firestore for this city's sights field
+                                val cityDocs = FirebaseFirestore.getInstance()
+                                    .collection("cities")
+                                    .whereEqualTo("name", name)
+                                    .get()
+                                    .await()
+                                if (!cityDocs.isEmpty) {
+                                    val cityData = cityDocs.documents[0].data
+                                    val citySights = cityData?.get("sights") as? List<Map<String, Any>>
+                                    if (citySights != null && citySights.any { (it["name"] as? String) == sightName }) {
+                                        showSightDialog = true
+                                        return@launch
+                                    }
+                                }
+                                // 3. All checks passed, add sight
+                                sights = sights + Sight(
+                                    name = sightName,
+                                    description = sightDescription,
+                                    location = GeoPoint(lat, lon),
+                                    imageUrl = sightImageUrl
+                                )
+                                sightName = ""
+                                sightDescription = ""
+                                sightLatitude = ""
+                                sightLongitude = ""
+                                sightImageUrl = ""
+                            }
                         }
                     }
                 ) {
@@ -166,6 +193,16 @@ fun AddCityScreen(navController: NavController) {
                     text = { Text("City already exists.") },
                     confirmButton = {
                         Button(onClick = { showDialog = false }) { Text("OK") }
+                    }
+                )
+            }
+            if (showSightDialog) {
+                AlertDialog(
+                    onDismissRequest = { showSightDialog = false },
+                    title = { Text("Error") },
+                    text = { Text("Sight already exists.") },
+                    confirmButton = {
+                        Button(onClick = { showSightDialog = false }) { Text("OK") }
                     }
                 )
             }
