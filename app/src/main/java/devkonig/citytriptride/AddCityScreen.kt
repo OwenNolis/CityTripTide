@@ -23,6 +23,7 @@ fun AddCityScreen(navController: NavController) {
     var imageUrl by remember { mutableStateOf("") }
     var isSaving by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var showDialog by remember { mutableStateOf(false) }
 
     // Sight form state
     var sightName by remember { mutableStateOf("") }
@@ -101,6 +102,7 @@ fun AddCityScreen(navController: NavController) {
                 if (errorMessage != null) {
                     Text(errorMessage!!, color = MaterialTheme.colors.error)
                 }
+
                 Button(
                     onClick = {
                         isSaving = true
@@ -112,19 +114,35 @@ fun AddCityScreen(navController: NavController) {
                             isSaving = false
                             return@Button
                         }
-                        val city = hashMapOf(
-                            "name" to name,
-                            "description" to description,
-                            "imageUrl" to imageUrl,
-                            "location" to GeoPoint(lat, lon),
-                            "sights" to sights
-                        )
+                        // Check if city exists
                         FirebaseFirestore.getInstance()
                             .collection("cities")
-                            .add(city)
-                            .addOnSuccessListener { navController.popBackStack() }
+                            .whereEqualTo("name", name)
+                            .get()
+                            .addOnSuccessListener { documents ->
+                                if (!documents.isEmpty) {
+                                    isSaving = false
+                                    showDialog = true
+                                } else {
+                                    val city = hashMapOf(
+                                        "name" to name,
+                                        "description" to description,
+                                        "imageUrl" to imageUrl,
+                                        "location" to GeoPoint(lat, lon),
+                                        "sights" to sights
+                                    )
+                                    FirebaseFirestore.getInstance()
+                                        .collection("cities")
+                                        .add(city)
+                                        .addOnSuccessListener { navController.popBackStack() }
+                                        .addOnFailureListener { e ->
+                                            errorMessage = "Failed to save: ${e.message}"
+                                            isSaving = false
+                                        }
+                                }
+                            }
                             .addOnFailureListener { e ->
-                                errorMessage = "Failed to save: ${e.message}"
+                                errorMessage = "Failed to check city: ${e.message}"
                                 isSaving = false
                             }
                     },
@@ -140,6 +158,16 @@ fun AddCityScreen(navController: NavController) {
                     .padding(bottom = 24.dp)
             ) {
                 Text("Cancel")
+            }
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    title = { Text("Error") },
+                    text = { Text("City already exists.") },
+                    confirmButton = {
+                        Button(onClick = { showDialog = false }) { Text("OK") }
+                    }
+                )
             }
         }
     }
