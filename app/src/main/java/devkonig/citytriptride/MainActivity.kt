@@ -49,6 +49,10 @@ class MainActivity : ComponentActivity() {
                     composable("profile") {
                         ProfileScreen(navController)
                     }
+                    composable("city/{cityId}") { backStackEntry ->
+                        val cityId = backStackEntry.arguments?.getString("cityId") ?: ""
+                        CityScreen(cityId = cityId, navController = navController)
+                    }
                 }
             }
         }

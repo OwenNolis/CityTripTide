@@ -16,11 +16,12 @@ import coil.compose.rememberImagePainter
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.clickable
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(navController: NavController) {
-    var cities by remember { mutableStateOf<List<City>>(emptyList()) }
+    var cities by remember { mutableStateOf<List<CityWithId>>(emptyList()) }
     var currentPage by remember { mutableStateOf(0) }
     val pageSize = 6
     val pageCount = (cities.size + pageSize - 1) / pageSize
@@ -33,8 +34,12 @@ fun HomeScreen(navController: NavController) {
             .addOnSuccessListener { result ->
                 val cityList = result.documents
                     .filter { it.id != "cityId" }
-                    .mapNotNull { doc -> doc.toObject(City::class.java) }
-                    .filter { it.name.isNotBlank() }
+                    .mapNotNull { doc ->
+                        doc.toObject(City::class.java)?.let { city ->
+                            CityWithId(doc.id, city)
+                        }
+                    }
+                    .filter { it.city.name.isNotBlank() }
                 cities = cityList
             }
     }
@@ -70,10 +75,12 @@ fun HomeScreen(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(pagedCities) { city ->
+                    items(pagedCities) { cityWithId ->
+                        val city = cityWithId.city
                         Card(
                             modifier = Modifier
-                                .aspectRatio(1f),
+                                .aspectRatio(1f)
+                                .clickable { navController.navigate("city/${cityWithId.id}") },
                             elevation = 4.dp
                         ) {
                             Column(
