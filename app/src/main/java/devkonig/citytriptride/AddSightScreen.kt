@@ -22,6 +22,7 @@ fun AddSightScreen(cityId: String, navController: NavController) {
     var imageUrl by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isSaving by remember { mutableStateOf(false) }
+    var showDuplicateDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -61,27 +62,57 @@ fun AddSightScreen(cityId: String, navController: NavController) {
                         return@Button
                     }
                     isSaving = true
-                    val newSight = hashMapOf(
-                        "name" to name,
-                        "description" to description,
-                        "location" to GeoPoint(lat, lon),
-                        "imageUrl" to imageUrl
-                    )
-                    val cityRef = FirebaseFirestore.getInstance()
+                    errorMessage = null
+
+                    // Duplicate check
+                    FirebaseFirestore.getInstance()
                         .collection("cities")
                         .document(cityId)
-                    cityRef.update("sights", FieldValue.arrayUnion(newSight))
-                        .addOnSuccessListener {
-                            navController.popBackStack()
+                        .get()
+                        .addOnSuccessListener { doc ->
+                            val sights = doc.get("sights") as? List<Map<String, Any>>
+                            val exists = sights?.any {
+                                (it["name"] as? String)?.trim()?.lowercase() == name.trim().lowercase()
+                            } ?: false
+                            if (exists) {
+                                isSaving = false
+                                showDuplicateDialog = true
+                            } else {
+                                val newSight = hashMapOf(
+                                    "name" to name,
+                                    "description" to description,
+                                    "location" to GeoPoint(lat, lon),
+                                    "imageUrl" to imageUrl
+                                )
+                                doc.reference.update("sights", FieldValue.arrayUnion(newSight))
+                                    .addOnSuccessListener {
+                                        navController.popBackStack()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        errorMessage = "Failed to add sight: ${e.message}"
+                                        isSaving = false
+                                    }
+                            }
                         }
                         .addOnFailureListener { e ->
-                            errorMessage = "Failed to add sight: ${e.message}"
+                            errorMessage = "Failed to check for duplicates: ${e.message}"
                             isSaving = false
                         }
                 },
                 enabled = !isSaving
             ) {
                 Text(if (isSaving) "Saving..." else "Save")
+            }
+
+            if (showDuplicateDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDuplicateDialog = false },
+                    title = { Text("Error") },
+                    text = { Text("A sight with this name already exists in this city.") },
+                    confirmButton = {
+                        Button(onClick = { showDuplicateDialog = false }) { Text("OK") }
+                    }
+                )
             }
         }
     }
