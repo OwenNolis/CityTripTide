@@ -2,7 +2,6 @@ package devkonig.citytriptride
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,9 +13,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 
 @Composable
 fun SightScreen(cityId: String, sightName: String, navController: NavController) {
@@ -53,6 +49,9 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                     }
                 }
             )
+        },
+        bottomBar = {
+            BottomNavBar(navController, currentRoute = "sight")
         }
     ) { innerPadding ->
         sight?.let { s ->
