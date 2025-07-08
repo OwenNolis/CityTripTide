@@ -205,7 +205,12 @@ fun CityScreen(cityId: String, navController: NavController) {
                     }
                 }
                 item {
-                    SightsGrid(c.sights)
+                    SightsGrid(
+                        sights = c.sights,
+                        onSightClick = { sight ->
+                            navController.navigate("sight/$cityId/${sight.name}")
+                        }
+                    )
                 }
             }
         } ?: Box(
