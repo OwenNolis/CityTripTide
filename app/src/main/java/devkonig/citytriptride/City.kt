@@ -9,9 +9,3 @@ data class City(
     val location: GeoPoint = GeoPoint(0.0, 0.0),
     val sights: List<Sight> = emptyList()
 )
-
-//data class Sight(
-//    val name: String = "",
-//    val description: String = "",
-//    val location: GeoPoint = GeoPoint(0.0, 0.0)
-//)
