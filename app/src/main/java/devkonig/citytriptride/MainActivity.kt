@@ -53,6 +53,10 @@ class MainActivity : ComponentActivity() {
                         val cityId = backStackEntry.arguments?.getString("cityId") ?: ""
                         CityScreen(cityId = cityId, navController = navController)
                     }
+                    composable("addSight/{cityId}") { backStackEntry ->
+                        val cityId = backStackEntry.arguments?.getString("cityId") ?: ""
+                        AddSightScreen(cityId = cityId, navController = navController)
+                    }
                 }
             }
         }
