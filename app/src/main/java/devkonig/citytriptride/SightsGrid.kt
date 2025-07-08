@@ -2,6 +2,7 @@ package devkonig.citytriptride
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,12 +25,15 @@ import coil.compose.rememberImagePainter
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SightsGrid(sights: List<Sight>) {
+fun SightsGrid(
+    sights: List<Sight>,
+    onSightClick: (Sight) -> Unit
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(max = 800.dp), // Adjust as needed
+            .heightIn(max = 800.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(vertical = 8.dp)
@@ -37,7 +41,8 @@ fun SightsGrid(sights: List<Sight>) {
         items(sights) { sight ->
             Card(
                 modifier = Modifier
-                    .aspectRatio(1f),
+                    .aspectRatio(1f)
+                    .clickable { onSightClick(sight) },
                 elevation = 4.dp
             ) {
                 Column(
