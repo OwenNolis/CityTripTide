@@ -186,12 +186,23 @@ fun CityScreen(cityId: String, navController: NavController) {
                         )
                     }
                     Spacer(modifier = Modifier.height(20.dp))
-                    Text(
-                        text = "Sights",
-                        fontSize = 23.sp,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.h4
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Sights",
+                            fontSize = 23.sp,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.h4,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Button(
+                            onClick = { navController.navigate("addSight/$cityId") }
+                        ) {
+                            Text("Add Sight")
+                        }
+                    }
                 }
                 item {
                     SightsGrid(c.sights)
