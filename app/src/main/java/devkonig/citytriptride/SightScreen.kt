@@ -15,8 +15,11 @@ import com.google.firebase.firestore.GeoPoint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun SightScreen(cityId: String, sightName: String, navController: NavController) {
@@ -30,6 +33,24 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isSaving by remember { mutableStateOf(false) }
     var isDeleting by remember { mutableStateOf(false) }
+
+    // Favorite state
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+    var isFavorite by remember { mutableStateOf(false) }
+
+    // Check if sight is favorite
+    LaunchedEffect(cityId, sightName, userId) {
+        if (userId != null) {
+            val db = FirebaseFirestore.getInstance()
+            db.collection("users").document(userId)
+                .collection("favoriteSights")
+                .document("$cityId|$sightName")
+                .get()
+                .addOnSuccessListener { doc ->
+                    isFavorite = doc.exists()
+                }
+        }
+    }
 
     // Load sight
     LaunchedEffect(cityId, sightName) {
@@ -98,6 +119,37 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                             )
                         }
                         Spacer(modifier = Modifier.width(8.dp))
+                        // Favorite star icon (only when not editing)
+                        if (!isEditing) {
+                            IconButton(
+                                onClick = {
+                                    if (userId != null && sight != null) {
+                                        val db = FirebaseFirestore.getInstance()
+                                        val favRef = db.collection("users").document(userId)
+                                            .collection("favoriteSights").document("$cityId|$sightName")
+                                        if (isFavorite) {
+                                            favRef.delete()
+                                                .addOnSuccessListener { isFavorite = false }
+                                        } else {
+                                            favRef.set(
+                                                mapOf(
+                                                    "cityId" to cityId,
+                                                    "sightName" to sightName,
+                                                    "timestamp" to System.currentTimeMillis()
+                                                )
+                                            ).addOnSuccessListener { isFavorite = true }
+                                        }
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
+                                    contentDescription = if (isFavorite) "Unfavorite" else "Favorite",
+                                    tint = if (isFavorite) MaterialTheme.colors.primary else Color.Gray
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                        }
                         if (isEditing) {
                             Button(
                                 onClick = {
