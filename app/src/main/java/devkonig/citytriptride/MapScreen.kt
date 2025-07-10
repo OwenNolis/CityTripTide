@@ -52,13 +52,17 @@ fun MapScreen(
                 cameraPositionState = cameraPositionState,
                 onMapClick = { latLng -> selectedLocation = latLng }
             ) {
-                // Pin all cities
+                // Inside GoogleMap { ... }
                 cities.forEach { cityWithId ->
-                    val loc = cityWithId.city.location
-                    Marker(
-                        state = MarkerState(position = LatLng(loc.latitude, loc.longitude)),
-                        title = cityWithId.city.name
-                    )
+                    val city = cityWithId.city
+                    val cityLoc = city.location
+                    // Only show valid city locations
+                    if (cityLoc.latitude != 0.0 && cityLoc.longitude != 0.0) {
+                        Marker(
+                            state = MarkerState(position = LatLng(cityLoc.latitude, cityLoc.longitude)),
+                            title = city.name
+                        )
+                    }
                 }
                 // Pin all sights
                 sights.forEach { sight ->
