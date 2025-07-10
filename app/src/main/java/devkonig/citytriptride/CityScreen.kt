@@ -15,6 +15,8 @@ import com.google.firebase.firestore.GeoPoint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
@@ -29,6 +31,7 @@ fun CityScreen(cityId: String, navController: NavController) {
     var editedImageUrl by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isDeleting by remember { mutableStateOf(false) }
+    var isFavorite by remember { mutableStateOf(false) }
 
     LaunchedEffect(cityId) {
         FirebaseFirestore.getInstance()
@@ -86,6 +89,15 @@ fun CityScreen(cityId: String, navController: NavController) {
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.h5,
                                     modifier = Modifier.weight(1f)
+                                )
+                            }
+                            // Star icon between title and Edit button
+                            IconButton(
+                                onClick = { isFavorite = !isFavorite }
+                            ) {
+                                Icon(
+                                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                                    contentDescription = if (isFavorite) "Unfavorite" else "Favorite"
                                 )
                             }
                             Spacer(modifier = Modifier.width(8.dp))
