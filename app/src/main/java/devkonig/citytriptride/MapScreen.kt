@@ -63,14 +63,16 @@ fun MapScreen(
                             title = city.name
                         )
                     }
-                }
-                // Pin all sights
-                sights.forEach { sight ->
-                    val loc = sight.location
-                    Marker(
-                        state = MarkerState(position = LatLng(loc.latitude, loc.longitude)),
-                        title = sight.name
-                    )
+                    // Show all sights for this city
+                    city.sights.forEach { sight ->
+                        val sightLoc = sight.location
+                        if (sightLoc.latitude != 0.0 && sightLoc.longitude != 0.0) {
+                            Marker(
+                                state = MarkerState(position = LatLng(sightLoc.latitude, sightLoc.longitude)),
+                                title = sight.name
+                            )
+                        }
+                    }
                 }
                 // Optionally, show selected location
                 selectedLocation?.let {
