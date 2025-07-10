@@ -125,19 +125,27 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                                 onClick = {
                                     if (userId != null && sight != null) {
                                         val db = FirebaseFirestore.getInstance()
-                                        val favRef = db.collection("users").document(userId)
+                                        val favSightRef = db.collection("users").document(userId)
                                             .collection("favoriteSights").document("$cityId|$sightName")
+                                        val favCityRef = db.collection("users").document(userId)
+                                            .collection("favorites").document(cityId)
                                         if (isFavorite) {
-                                            favRef.delete()
+                                            favSightRef.delete()
                                                 .addOnSuccessListener { isFavorite = false }
                                         } else {
-                                            favRef.set(
-                                                mapOf(
-                                                    "cityId" to cityId,
-                                                    "sightName" to sightName,
-                                                    "timestamp" to System.currentTimeMillis()
-                                                )
-                                            ).addOnSuccessListener { isFavorite = true }
+                                            // Add city to favorites if not already
+                                            favCityRef.get().addOnSuccessListener { cityDoc ->
+                                                if (!cityDoc.exists()) {
+                                                    favCityRef.set(mapOf("timestamp" to System.currentTimeMillis()))
+                                                }
+                                                favSightRef.set(
+                                                    mapOf(
+                                                        "cityId" to cityId,
+                                                        "sightName" to sightName,
+                                                        "timestamp" to System.currentTimeMillis()
+                                                    )
+                                                ).addOnSuccessListener { isFavorite = true }
+                                            }
                                         }
                                     }
                                 }
