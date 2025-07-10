@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun CityScreen(cityId: String, navController: NavController) {
@@ -32,7 +33,9 @@ fun CityScreen(cityId: String, navController: NavController) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isDeleting by remember { mutableStateOf(false) }
     var isFavorite by remember { mutableStateOf(false) }
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
 
+    // Load city data
     LaunchedEffect(cityId) {
         FirebaseFirestore.getInstance()
             .collection("cities")
@@ -41,6 +44,19 @@ fun CityScreen(cityId: String, navController: NavController) {
             .addOnSuccessListener { doc ->
                 city = doc.toObject(City::class.java)
             }
+    }
+
+    // Check if city is favorite for this user
+    LaunchedEffect(cityId, userId) {
+        if (userId != null) {
+            FirebaseFirestore.getInstance()
+                .collection("users").document(userId)
+                .collection("favorites").document(cityId)
+                .get()
+                .addOnSuccessListener { doc ->
+                    isFavorite = doc.exists()
+                }
+        }
     }
 
     Scaffold(
@@ -93,7 +109,19 @@ fun CityScreen(cityId: String, navController: NavController) {
                             }
                             // Star icon between title and Edit button
                             IconButton(
-                                onClick = { isFavorite = !isFavorite }
+                                onClick = {
+                                    if (userId != null) {
+                                        val favRef = FirebaseFirestore.getInstance()
+                                            .collection("users").document(userId)
+                                            .collection("favorites").document(cityId)
+                                        if (isFavorite) {
+                                            favRef.delete()
+                                        } else {
+                                            favRef.set(mapOf("cityId" to cityId))
+                                        }
+                                        isFavorite = !isFavorite
+                                    }
+                                }
                             ) {
                                 Icon(
                                     imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
