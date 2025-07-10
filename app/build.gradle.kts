@@ -71,6 +71,9 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
 
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.maps)
+
     // Import the Firebase BoM
     implementation(platform(libs.firebase.bom))
 
