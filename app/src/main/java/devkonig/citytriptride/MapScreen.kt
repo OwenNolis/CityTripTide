@@ -26,6 +26,7 @@ fun MapScreen(
     var selectedLocation by remember { mutableStateOf<LatLng?>(null) }
     var selectedLocationName by remember { mutableStateOf<String?>(null) }
     var expandedCityId by remember { mutableStateOf<String?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(51.5074, -0.1278), 10f)
     }
@@ -33,6 +34,20 @@ fun MapScreen(
     // Filter out the default/empty city
     val filteredCities = cities.filter {
         it.id != "cityId" && it.city.location.latitude != 0.0 && it.city.location.longitude != 0.0
+    }
+
+    // Filter cities and sights by search query
+    val searchResults = if (searchQuery.isBlank()) {
+        filteredCities
+    } else {
+        filteredCities.mapNotNull { cityWithId ->
+            val city = cityWithId.city
+            val cityMatches = city.name.contains(searchQuery, ignoreCase = true)
+            val matchingSights = city.sights.filter { it.name.contains(searchQuery, ignoreCase = true) }
+            if (cityMatches || matchingSights.isNotEmpty()) {
+                cityWithId.copy(city = city.copy(sights = if (cityMatches) city.sights else matchingSights))
+            } else null
+        }
     }
 
     // Move camera and update address when selectedLocation changes
@@ -96,13 +111,22 @@ fun MapScreen(
                     }
                 }
             }
+            // Search bar
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                label = { Text("Search cities or sights") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
             // List of cities and sights
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 300.dp)
             ) {
-                items(filteredCities) { cityWithId ->
+                items(searchResults) { cityWithId ->
                     val city = cityWithId.city
                     val cityLoc = city.location
                     Card(
@@ -117,7 +141,7 @@ fun MapScreen(
                     ) {
                         Column(modifier = Modifier.padding(8.dp)) {
                             Text(city.name, style = MaterialTheme.typography.h6)
-                            if (expandedCityId == cityWithId.id) {
+                            if (expandedCityId == cityWithId.id || (searchQuery.isNotBlank() && city.sights.isNotEmpty())) {
                                 Spacer(modifier = Modifier.height(4.dp))
                                 city.sights.forEach { sight ->
                                     val sightLoc = sight.location
@@ -126,6 +150,7 @@ fun MapScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable {
+                                                    expandedCityId = cityWithId.id
                                                     selectedLocation = LatLng(sightLoc.latitude, sightLoc.longitude)
                                                 }
                                                 .padding(start = 16.dp, top = 4.dp, bottom = 4.dp)
