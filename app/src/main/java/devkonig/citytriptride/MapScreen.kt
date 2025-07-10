@@ -8,6 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -20,8 +21,10 @@ fun MapScreen(
     navController: NavController,
     viewModel: MapViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    val context = LocalContext.current
     val cities by viewModel.cities.collectAsState()
     var selectedLocation by remember { mutableStateOf<LatLng?>(null) }
+    var selectedLocationName by remember { mutableStateOf<String?>(null) }
     var expandedCityId by remember { mutableStateOf<String?>(null) }
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(51.5074, -0.1278), 10f)
@@ -32,10 +35,11 @@ fun MapScreen(
         it.id != "cityId" && it.city.location.latitude != 0.0 && it.city.location.longitude != 0.0
     }
 
-    // Move camera when selectedLocation changes
+    // Move camera and update address when selectedLocation changes
     LaunchedEffect(selectedLocation) {
         selectedLocation?.let {
             cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(it, 12f))
+            selectedLocationName = LocationUtils.getLocationName(context, it.latitude, it.longitude)
         }
     }
 
@@ -86,7 +90,8 @@ fun MapScreen(
                     selectedLocation?.let {
                         Marker(
                             state = MarkerState(position = it),
-                            title = "Lat: %.5f, Lng: %.5f".format(it.latitude, it.longitude)
+                            title = selectedLocationName ?: "Selected Location",
+                            snippet = "Lat: %.5f, Lng: %.5f".format(it.latitude, it.longitude)
                         )
                     }
                 }
