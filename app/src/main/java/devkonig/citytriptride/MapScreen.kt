@@ -86,7 +86,7 @@ fun MapScreen(
                     selectedLocation?.let {
                         Marker(
                             state = MarkerState(position = it),
-                            title = "Selected Location"
+                            title = "Lat: %.5f, Lng: %.5f".format(it.latitude, it.longitude)
                         )
                     }
                 }
