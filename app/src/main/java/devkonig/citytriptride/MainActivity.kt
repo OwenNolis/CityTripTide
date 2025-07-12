@@ -46,6 +46,9 @@ class MainActivity : ComponentActivity() {
                     composable("favorites") {
                         FavoriteListScreen(navController)
                     }
+                    composable("rating") {
+                        RatingScreen(navController, "rating")
+                    }
                     composable("profile") {
                         ProfileScreen(navController)
                     }
