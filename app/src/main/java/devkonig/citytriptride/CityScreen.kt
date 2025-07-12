@@ -17,6 +17,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
@@ -34,6 +36,13 @@ fun CityScreen(cityId: String, navController: NavController) {
     var isDeleting by remember { mutableStateOf(false) }
     var isFavorite by remember { mutableStateOf(false) }
     val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+    // --- Rating dialog state ---
+    var showRatingDialog by remember { mutableStateOf(false) }
+    var rating by remember { mutableStateOf(0) }
+    var comment by remember { mutableStateOf("") }
+    var isSubmitting by remember { mutableStateOf(false) }
+    var ratingError by remember { mutableStateOf<String?>(null) }
 
     // Load city data
     LaunchedEffect(cityId) {
@@ -220,16 +229,27 @@ fun CityScreen(cityId: String, navController: NavController) {
                                 style = MaterialTheme.typography.body1
                             )
                             Spacer(modifier = Modifier.height(20.dp))
-                            Text(
-                                text = "Latitude: ${c.location.latitude}",
-                                fontSize = 20.sp,
-                                style = MaterialTheme.typography.body1
-                            )
-                            Text(
-                                text = "Longitude: ${c.location.longitude}",
-                                fontSize = 20.sp,
-                                style = MaterialTheme.typography.body2
-                            )
+                            // --- Latitude, Longitude, and Give Rating Button Row ---
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Latitude: ${c.location.latitude}",
+                                        fontSize = 20.sp,
+                                        style = MaterialTheme.typography.body1
+                                    )
+                                    Text(
+                                        text = "Longitude: ${c.location.longitude}",
+                                        fontSize = 20.sp,
+                                        style = MaterialTheme.typography.body2
+                                    )
+                                }
+                                Button(onClick = { showRatingDialog = true }) {
+                                    Text("Give rating")
+                                }
+                            }
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                         Row(
@@ -291,6 +311,70 @@ fun CityScreen(cityId: String, navController: NavController) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(errorMessage!!, color = MaterialTheme.colors.error)
                 }
+                // --- Rating Dialog ---
+                if (showRatingDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showRatingDialog = false },
+                        title = { Text("Give rating") },
+                        text = {
+                            Column {
+                                HeartRatingBar(rating = rating, onRatingChanged = { rating = it })
+                                OutlinedTextField(
+                                    value = comment,
+                                    onValueChange = { comment = it },
+                                    label = { Text("Your comment") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                if (ratingError != null) {
+                                    Text(ratingError!!, color = MaterialTheme.colors.error)
+                                }
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    if (userId == null) {
+                                        ratingError = "You must be logged in."
+                                        return@Button
+                                    }
+                                    if (rating == 0) {
+                                        ratingError = "Please select a rating."
+                                        return@Button
+                                    }
+                                    isSubmitting = true
+                                    ratingError = null
+                                    val db = FirebaseFirestore.getInstance()
+                                    val ratingObj = mapOf(
+                                        "userId" to userId,
+                                        "rating" to rating,
+                                        "comment" to comment
+                                    )
+                                    db.collection("cities").document(cityId)
+                                        .collection("ratings").document(userId)
+                                        .set(ratingObj)
+                                        .addOnSuccessListener {
+                                            isSubmitting = false
+                                            showRatingDialog = false
+                                            rating = 0
+                                            comment = ""
+                                        }
+                                        .addOnFailureListener { e ->
+                                            ratingError = "Failed to submit: ${e.message}"
+                                            isSubmitting = false
+                                        }
+                                },
+                                enabled = !isSubmitting
+                            ) {
+                                Text(if (isSubmitting) "Submitting..." else "Submit")
+                            }
+                        },
+                        dismissButton = {
+                            OutlinedButton(onClick = { showRatingDialog = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
             }
         } ?: Box(
             modifier = Modifier
@@ -299,6 +383,22 @@ fun CityScreen(cityId: String, navController: NavController) {
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
+        }
+    }
+}
+
+// --- HeartRatingBar Composable ---
+@Composable
+fun HeartRatingBar(rating: Int, onRatingChanged: (Int) -> Unit) {
+    Row {
+        for (i in 1..5) {
+            IconButton(onClick = { onRatingChanged(i) }) {
+                Icon(
+                    imageVector = if (i <= rating) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = "$i hearts",
+                    tint = if (i <= rating) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
+                )
+            }
         }
     }
 }
