@@ -9,6 +9,8 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.RateReview
+import androidx.compose.material.icons.filled.StarRate
 
 data class NavBarItem(val icon: ImageVector, val label: String, val route: String)
 
@@ -18,6 +20,7 @@ fun BottomNavBar(navController: NavController, currentRoute: String?) {
         NavBarItem(Icons.Default.Home, "Home", "home"),
         NavBarItem(Icons.Default.Map, "Map", "map"),
         NavBarItem(Icons.Default.Star, "Favorites", "favorites"),
+        NavBarItem(Icons.Default.RateReview, "Ratings", "ratings"),
         NavBarItem(Icons.Default.Person, "Profile", "profile")
     )
     BottomNavigation {
