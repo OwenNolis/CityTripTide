@@ -122,7 +122,7 @@ fun RatingScreen(
                                     Text("No ratings yet.", style = MaterialTheme.typography.body2)
                                 } else {
                                     ratings.forEach { rating ->
-                                        Text("${rating.userId}: ${rating.rating}", style = MaterialTheme.typography.body2)
+                                        Text("${rating.userId}: ${rating.comment} (${rating.rating}/5)", style = MaterialTheme.typography.body2)
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
