@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun RatingScreen(
@@ -20,6 +21,8 @@ fun RatingScreen(
     val cities by viewModel.cities.collectAsState()
     var expandedCityId by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
+    var ratings by remember { mutableStateOf<List<CityRating>>(emptyList()) }
+    var ratingsLoading by remember { mutableStateOf(false) }
 
     // Filter out the default/empty city
     val filteredCities = cities.filter {
@@ -37,6 +40,27 @@ fun RatingScreen(
             if (cityMatches || matchingSights.isNotEmpty()) {
                 cityWithId.copy(city = city.copy(sights = if (cityMatches) city.sights else matchingSights))
             } else null
+        }
+    }
+
+    // Load ratings when a city is expanded
+    LaunchedEffect(expandedCityId) {
+        if (expandedCityId != null) {
+            ratingsLoading = true
+            FirebaseFirestore.getInstance()
+                .collection("cities").document(expandedCityId!!)
+                .collection("ratings")
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    ratings = snapshot.documents.mapNotNull { it.toObject(CityRating::class.java) }
+                    ratingsLoading = false
+                }
+                .addOnFailureListener {
+                    ratings = emptyList()
+                    ratingsLoading = false
+                }
+        } else {
+            ratings = emptyList()
         }
     }
 
@@ -90,6 +114,20 @@ fun RatingScreen(
                             Text(city.name, style = MaterialTheme.typography.h6)
                             if (expandedCityId == cityWithId.id || (searchQuery.isNotBlank() && city.sights.isNotEmpty())) {
                                 Spacer(modifier = Modifier.height(4.dp))
+                                // Ratings section
+                                Text("Ratings:", style = MaterialTheme.typography.subtitle1)
+                                if (ratingsLoading) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                } else if (ratings.isEmpty()) {
+                                    Text("No ratings yet.", style = MaterialTheme.typography.body2)
+                                } else {
+                                    ratings.forEach { rating ->
+                                        Text("${rating.userId}: ${rating.rating}", style = MaterialTheme.typography.body2)
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                // Sights section
+                                Text("Sights:", style = MaterialTheme.typography.subtitle1)
                                 city.sights.forEach { sight ->
                                     Row(
                                         modifier = Modifier
