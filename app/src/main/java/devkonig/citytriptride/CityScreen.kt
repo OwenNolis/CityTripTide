@@ -22,6 +22,7 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
+import devkonig.citytriptride.HeartRatingBar
 
 @Composable
 fun CityScreen(cityId: String, navController: NavController) {
@@ -383,22 +384,6 @@ fun CityScreen(cityId: String, navController: NavController) {
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
-        }
-    }
-}
-
-// --- HeartRatingBar Composable ---
-@Composable
-fun HeartRatingBar(rating: Int, onRatingChanged: (Int) -> Unit) {
-    Row {
-        for (i in 1..5) {
-            IconButton(onClick = { onRatingChanged(i) }) {
-                Icon(
-                    imageVector = if (i <= rating) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                    contentDescription = "$i hearts",
-                    tint = if (i <= rating) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
-                )
-            }
         }
     }
 }
