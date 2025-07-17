@@ -12,6 +12,7 @@ fun WelcomeScreen(
     onNavigateToSignup: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
+    // Set the background color for the entire screen
     Column(
         modifier = Modifier
             .fillMaxSize()
