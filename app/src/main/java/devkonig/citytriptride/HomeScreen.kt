@@ -22,12 +22,14 @@ import coil.compose.rememberAsyncImagePainter
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(navController: NavController) {
+    // State to hold the list of cities and the current page
     var cities by remember { mutableStateOf<List<CityWithId>>(emptyList()) }
     var currentPage by remember { mutableIntStateOf(0) }
     val pageSize = 6
     val pageCount = (cities.size + pageSize - 1) / pageSize
     val pagedCities = cities.drop(currentPage * pageSize).take(pageSize)
 
+    // Fetch cities from Firestore when the composable is first launched
     LaunchedEffect(Unit) {
         FirebaseFirestore.getInstance()
             .collection("cities")
@@ -45,6 +47,7 @@ fun HomeScreen(navController: NavController) {
             }
     }
 
+    // Scaffold to provide a layout with a bottom navigation bar
     Scaffold(
         bottomBar = {
             BottomNavBar(navController, currentRoute = "home")
@@ -122,6 +125,7 @@ fun HomeScreen(navController: NavController) {
                 }
             }
 
+            // Floating action button to add a new city
             FloatingActionButton(
                 onClick = { navController.navigate("addCity") },
                 modifier = Modifier
