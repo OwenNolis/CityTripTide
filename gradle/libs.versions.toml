@@ -20,29 +20,52 @@ navigationComposeJvmstubs = "2.9.0"
 material3Android = "1.3.2"
 
 [libraries]
+# Adds a versioned alias for the Activity Compose library in the Gradle version catalog
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+# Adds a versioned alias for the Core KTX library in the Gradle version catalog
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+# Adds a versioned alias for the Lifecycle Runtime KTX library in the Gradle version catalog
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+# Adds a versioned alias for the Jetpack Compose Material library in the Gradle version catalog
 androidx-material = { module = "androidx.compose.material:material", version.ref = "materialVersion" }
+# Adds a versioned alias for the Jetpack Compose Navigation library in the Gradle version catalog
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+# Adds a versioned alias for the Jetpack Compose Runtime LiveData library in the Gradle version catalog
 androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedata" }
+# Adds a versioned alias for the Jetpack Compose UI library in the Gradle version catalog
 androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "uiToolingPreview" }
+# Adds a versioned alias for the Jetpack Compose UI Tooling Preview library in the Gradle version catalog
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
+# Adds a versioned alias for the Firebase libraries in the Gradle version catalog
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+# Adds a versioned alias for the Firebase Authentication library in the Gradle version catalog
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
+# Adds a versioned alias for the Firebase Bill of Materials (BOM) library in the Gradle version catalog
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+# Adds a versioned alias for the Firebase Firestore library in the Gradle version catalog
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
+# Adds a versioned alias for the JUnit testing library in the Gradle version catalog
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+# Adds a versioned alias for the AndroidX JUnit library in the Gradle version catalog
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+# Adds a versioned alias for the AndroidX Espresso Core library in the Gradle version catalog
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+# Adds a versioned alias for the AndroidX AppCompat library in the Gradle version catalog
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+# Adds a versioned alias for the Google Maps Compose library in the Gradle version catalog
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
+# Adds a versioned alias for the Google Material Design library in the Gradle version catalog
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+# Adds a versioned alias for the AndroidX Navigation Compose library in the Gradle version catalog
 androidx-navigation-compose-jvmstubs = { group = "androidx.navigation", name = "navigation-compose-jvmstubs", version.ref = "navigationComposeJvmstubs" }
+# Adds a versioned alias for the AndroidX Material3 library in the Gradle version catalog
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
+# Adds a versioned alias for Google Play Services Maps library in the Gradle version catalog
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 
 [plugins]
+# This file sets versions and aliases for libraries and plugins used in the Gradle project
 android-application = { id = "com.android.application", version.ref = "agp" }
+# Creates a plugin alias for the Kotlin Android Gradle plugin, using the version defined by the kotlin key.
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 
