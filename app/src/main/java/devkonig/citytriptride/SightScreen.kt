@@ -344,6 +344,7 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                                 Column(modifier = Modifier.padding(8.dp)) {
                                     Text("Rating: ${r.rating}", fontWeight = FontWeight.Bold)
                                     Text("Comment: ${r.comment}")
+                                    Text("User: ${r.userId}", style = MaterialTheme.typography.caption)
                                 }
                             }
                         }
