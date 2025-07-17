@@ -21,6 +21,7 @@ import kotlinx.coroutines.tasks.await
 
 @Composable
 fun AddCityScreen(navController: NavController) {
+    // City form state
     var name by remember { mutableStateOf("") }
     var latitude by remember { mutableStateOf("") }
     var longitude by remember { mutableStateOf("") }
@@ -39,8 +40,10 @@ fun AddCityScreen(navController: NavController) {
     var sightImageUrl by remember { mutableStateOf("") }
     var sights by remember { mutableStateOf(listOf<Sight>()) }
 
+    // Coroutine scope for async operations
     val scope = rememberCoroutineScope()
 
+    // Scaffold for the screen layout
     Scaffold(
         topBar = {
             TopAppBar(
@@ -66,6 +69,7 @@ fun AddCityScreen(navController: NavController) {
                     .padding(top = 8.dp, start = 16.dp, end = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                // City form
                 Text("Add city", style = MaterialTheme.typography.h5)
                 TextField(value = name, onValueChange = { name = it }, label = { Text("Name") })
                 TextField(value = latitude, onValueChange = { latitude = it }, label = { Text("Latitude") })
@@ -73,6 +77,7 @@ fun AddCityScreen(navController: NavController) {
                 TextField(value = description, onValueChange = { description = it }, label = { Text("Description") })
                 TextField(value = imageUrl, onValueChange = { imageUrl = it }, label = { Text("Image URL") })
 
+                // Sight form
                 Divider()
                 Text("Add Sight", style = MaterialTheme.typography.h6)
                 TextField(value = sightName, onValueChange = { sightName = it }, label = { Text("Sight Name") })
@@ -82,6 +87,7 @@ fun AddCityScreen(navController: NavController) {
                 TextField(value = sightImageUrl, onValueChange = { sightImageUrl = it }, label = { Text("Sight Image URL") })
                 Button(
                     onClick = {
+                        // Validate sight input
                         val lat = sightLatitude.toDoubleOrNull()
                         val lon = sightLongitude.toDoubleOrNull()
                         if (sightName.isNotBlank() && lat != null && lon != null) {
@@ -112,6 +118,7 @@ fun AddCityScreen(navController: NavController) {
                                     location = GeoPoint(lat, lon),
                                     imageUrl = sightImageUrl
                                 )
+                                // Clear sight fields
                                 sightName = ""
                                 sightDescription = ""
                                 sightLatitude = ""
@@ -129,10 +136,12 @@ fun AddCityScreen(navController: NavController) {
                     Text("- ${sight.name} (${sight.location.latitude}, ${sight.location.longitude})")
                 }
 
+                // Error message display
                 if (errorMessage != null) {
                     Text(errorMessage!!, color = MaterialTheme.colors.error)
                 }
 
+                // Save city button
                 Button(
                     onClick = {
                         isSaving = true
@@ -160,6 +169,7 @@ fun AddCityScreen(navController: NavController) {
                                         "location" to GeoPoint(lat, lon),
                                         "sights" to sights
                                     )
+                                    // Save city to Firestore
                                     FirebaseFirestore.getInstance()
                                         .collection("cities")
                                         .add(city)
@@ -180,6 +190,7 @@ fun AddCityScreen(navController: NavController) {
                     Text(if (isSaving) "Saving..." else "Save")
                 }
             }
+            // Cancel button
             Button(
                 onClick = { navController.popBackStack() },
                 modifier = Modifier
@@ -188,6 +199,7 @@ fun AddCityScreen(navController: NavController) {
             ) {
                 Text("Cancel")
             }
+            // Show error dialogs
             if (showDialog) {
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
@@ -198,6 +210,7 @@ fun AddCityScreen(navController: NavController) {
                     }
                 )
             }
+            // Show sight error dialog
             if (showSightDialog) {
                 AlertDialog(
                     onDismissRequest = { showSightDialog = false },
