@@ -22,6 +22,7 @@ fun MapScreen(
     navController: NavController,
     viewModel: MapViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    // Initialize the ViewModel and observe cities
     val context = LocalContext.current
     val cities by viewModel.cities.collectAsState()
     var selectedLocation by remember { mutableStateOf<LatLng?>(null) }
@@ -59,6 +60,7 @@ fun MapScreen(
         }
     }
 
+    // Scaffold with top app bar and bottom navigation
     Scaffold(
         topBar = {
             TopAppBar(
