@@ -12,10 +12,12 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RateReview
 
+// Data class to represent each item in the bottom navigation bar
 data class NavBarItem(val icon: ImageVector, val label: String, val route: String)
 
 @Composable
 fun BottomNavBar(navController: NavController, currentRoute: String?) {
+    // List of items to be displayed in the bottom navigation bar
     val items = listOf(
         NavBarItem(Icons.Default.Home, "Home", "home"),
         NavBarItem(Icons.Default.Map, "Map", "map"),
@@ -23,6 +25,7 @@ fun BottomNavBar(navController: NavController, currentRoute: String?) {
         NavBarItem(Icons.Default.RateReview, "Ratings", "ratings"),
         NavBarItem(Icons.Default.Person, "Profile", "profile")
     )
+    // BottomNavigation composable to display the navigation bar
     BottomNavigation {
         items.forEach { item ->
             BottomNavigationItem(
