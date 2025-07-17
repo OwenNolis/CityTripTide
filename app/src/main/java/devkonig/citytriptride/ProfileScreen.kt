@@ -31,8 +31,10 @@ import coil.compose.rememberAsyncImagePainter
 private const val PREFS_NAME = "profile_prefs"
 private const val KEY_IMAGE_URI_PREFIX = "profile_image_uri_"
 
+// ProfileScreen displays the user's profile information and allows them to change their profile picture.
 @Composable
 fun ProfileScreen(navController: NavController) {
+    // Get the current context and shared preferences
     val context = LocalContext.current
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     val user = FirebaseAuth.getInstance().currentUser
@@ -50,6 +52,7 @@ fun ProfileScreen(navController: NavController) {
         }
     }
 
+    // Launcher to pick an image from the gallery
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null && userUid != null) {
             imageUri = uri
@@ -57,6 +60,7 @@ fun ProfileScreen(navController: NavController) {
         }
     }
 
+    // Scaffold to provide a top bar and bottom navigation
     Scaffold(
         bottomBar = {
             BottomNavBar(navController, currentRoute = "profile")
