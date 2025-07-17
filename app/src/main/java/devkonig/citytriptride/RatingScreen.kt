@@ -8,6 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.firestore.FirebaseFirestore
@@ -44,7 +45,7 @@ fun RatingScreen(
         }
     }
 
-    // Load city ratings when a city is expanded
+    // Load city ratings and sight ratings when a city is expanded
     LaunchedEffect(expandedCityId) {
         if (expandedCityId != null) {
             ratingsLoading = true
@@ -137,6 +138,16 @@ fun RatingScreen(
                                 Spacer(modifier = Modifier.height(4.dp))
                                 // Ratings section
                                 Text("Ratings:", style = MaterialTheme.typography.subtitle1)
+                                // --- Average city rating ---
+                                val averageCityRating = if (ratings.isNotEmpty()) {
+                                    ratings.map { it.rating }.average()
+                                } else 0.0
+                                Text(
+                                    text = "Average City Rating: ${"%.1f".format(averageCityRating)}",
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.body1,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
                                 if (ratingsLoading) {
                                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
                                 } else if (ratings.isEmpty()) {
