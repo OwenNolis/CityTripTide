@@ -16,10 +16,12 @@ fun SignupScreen(
     onSignup: (String, String) -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
+    // State variables for email and password
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val context = LocalContext.current
 
+    // Layout for the signup screen
     Column(
         modifier = Modifier
             .fillMaxSize()
