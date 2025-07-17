@@ -23,6 +23,7 @@ fun RatingScreen(
     var searchQuery by remember { mutableStateOf("") }
     var ratings by remember { mutableStateOf<List<CityRating>>(emptyList()) }
     var ratingsLoading by remember { mutableStateOf(false) }
+    var sightRatingsMap by remember { mutableStateOf<Map<String, Map<String, Double>>>(emptyMap()) }
 
     // Filter out the default/empty city
     val filteredCities = cities.filter {
@@ -43,7 +44,7 @@ fun RatingScreen(
         }
     }
 
-    // Load ratings when a city is expanded
+    // Load city ratings when a city is expanded
     LaunchedEffect(expandedCityId) {
         if (expandedCityId != null) {
             ratingsLoading = true
@@ -58,6 +59,26 @@ fun RatingScreen(
                 .addOnFailureListener {
                     ratings = emptyList()
                     ratingsLoading = false
+                }
+
+            // Fetch sight ratings for the expanded city
+            FirebaseFirestore.getInstance()
+                .collection("cities").document(expandedCityId!!)
+                .collection("sightRatings")
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    val ratingsBySight = mutableMapOf<String, MutableList<Int>>()
+                    snapshot.documents.forEach { doc ->
+                        val sightName = doc.getString("sightName") ?: return@forEach
+                        val rating = doc.getLong("rating")?.toInt() ?: return@forEach
+                        ratingsBySight.getOrPut(sightName) { mutableListOf() }.add(rating)
+                    }
+                    val avgMap = ratingsBySight.mapValues { (_, ratings) ->
+                        if (ratings.isNotEmpty()) ratings.average() else 0.0
+                    }
+                    sightRatingsMap = sightRatingsMap.toMutableMap().apply {
+                        put(expandedCityId!!, avgMap)
+                    }
                 }
         } else {
             ratings = emptyList()
@@ -129,12 +150,26 @@ fun RatingScreen(
                                 // Sights section
                                 Text("Sights:", style = MaterialTheme.typography.subtitle1)
                                 city.sights.forEach { sight ->
-                                    Row(
+                                    val avgRating = sightRatingsMap[cityWithId.id]?.get(sight.name) ?: 0.0
+                                    Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(start = 16.dp, top = 4.dp, bottom = 4.dp)
                                     ) {
                                         Text("• ${sight.name}", style = MaterialTheme.typography.body2)
+                                        if (avgRating > 0.0) {
+                                            Text(
+                                                text = "Average Rating: ${"%.1f".format(avgRating)}",
+                                                style = MaterialTheme.typography.caption,
+                                                modifier = Modifier.padding(start = 8.dp)
+                                            )
+                                        } else {
+                                            Text(
+                                                text = "No ratings yet.",
+                                                style = MaterialTheme.typography.caption,
+                                                modifier = Modifier.padding(start = 8.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }
