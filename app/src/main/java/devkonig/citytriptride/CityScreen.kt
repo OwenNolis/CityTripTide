@@ -24,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun CityScreen(cityId: String, navController: NavController) {
+    // --- State variables ---
     var city by remember { mutableStateOf<City?>(null) }
     var isEditing by remember { mutableStateOf(false) }
     var editedName by remember { mutableStateOf("") }
@@ -94,6 +95,7 @@ fun CityScreen(cityId: String, navController: NavController) {
             }
     }
 
+    // --- Scaffold with top bar, bottom bar, and content ---
     Scaffold(
         topBar = {
             TopAppBar(
@@ -358,6 +360,7 @@ fun CityScreen(cityId: String, navController: NavController) {
                         Text(if (isDeleting) "Deleting..." else "Delete", color = androidx.compose.ui.graphics.Color.White)
                     }
                 }
+                // --- Error message display ---
                 if (errorMessage != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(errorMessage!!, color = MaterialTheme.colors.error)
