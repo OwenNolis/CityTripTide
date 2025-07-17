@@ -6,23 +6,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.foundation.clickable
+import coil.compose.rememberAsyncImagePainter
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(navController: NavController) {
     var cities by remember { mutableStateOf<List<CityWithId>>(emptyList()) }
-    var currentPage by remember { mutableStateOf(0) }
+    var currentPage by remember { mutableIntStateOf(0) }
     val pageSize = 6
     val pageCount = (cities.size + pageSize - 1) / pageSize
     val pagedCities = cities.drop(currentPage * pageSize).take(pageSize)
@@ -89,7 +90,7 @@ fun HomeScreen(navController: NavController) {
                                 Text(text = city.name, style = MaterialTheme.typography.h6)
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Image(
-                                    painter = rememberImagePainter(city.imageUrl),
+                                    painter = rememberAsyncImagePainter(city.imageUrl),
                                     contentDescription = city.name,
                                     modifier = Modifier
                                         .fillMaxWidth()

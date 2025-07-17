@@ -1,9 +1,13 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package devkonig.citytriptride
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -11,18 +15,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 
+@SuppressLint("AutoboxingStateCreation")
 @Composable
 fun SightScreen(cityId: String, sightName: String, navController: NavController) {
     var sight by remember { mutableStateOf<Sight?>(null) }
@@ -107,7 +112,7 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                 title = { Text("Sight Details") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -274,7 +279,7 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                             )
                         } else if (s.imageUrl.isNotBlank()) {
                             Image(
-                                painter = rememberImagePainter(s.imageUrl),
+                                painter = rememberAsyncImagePainter(s.imageUrl),
                                 contentDescription = s.name,
                                 modifier = Modifier
                                     .fillMaxWidth()

@@ -15,13 +15,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Card
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.MaterialTheme
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -54,7 +57,7 @@ fun SightsGrid(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Image(
-                        painter = rememberImagePainter(sight.imageUrl),
+                        painter = rememberAsyncImagePainter(sight.imageUrl),
                         contentDescription = sight.name,
                         modifier = Modifier
                             .fillMaxWidth()

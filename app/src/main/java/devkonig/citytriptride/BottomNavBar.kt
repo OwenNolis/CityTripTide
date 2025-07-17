@@ -1,5 +1,6 @@
 package devkonig.citytriptride
 
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -10,7 +11,6 @@ import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RateReview
-import androidx.compose.material.icons.filled.StarRate
 
 data class NavBarItem(val icon: ImageVector, val label: String, val route: String)
 

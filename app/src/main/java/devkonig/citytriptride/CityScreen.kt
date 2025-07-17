@@ -3,24 +3,24 @@ package devkonig.citytriptride
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
-import devkonig.citytriptride.HeartRatingBar
 
 @Composable
 fun CityScreen(cityId: String, navController: NavController) {
@@ -38,7 +38,7 @@ fun CityScreen(cityId: String, navController: NavController) {
 
     // --- Rating dialog state ---
     var showRatingDialog by remember { mutableStateOf(false) }
-    var rating by remember { mutableStateOf(0) }
+    var rating by remember { mutableIntStateOf(0) }
     var comment by remember { mutableStateOf("") }
     var isSubmitting by remember { mutableStateOf(false) }
     var ratingError by remember { mutableStateOf<String?>(null) }
@@ -46,7 +46,7 @@ fun CityScreen(cityId: String, navController: NavController) {
     // --- City ratings state ---
     var cityRatings by remember { mutableStateOf<List<CityRating>>(emptyList()) }
     var ratingsLoading by remember { mutableStateOf(false) }
-    var averageCityRating by remember { mutableStateOf(0.0) }
+    var averageCityRating by remember { mutableDoubleStateOf(0.0) }
 
     // Load city data
     LaunchedEffect(cityId) {
@@ -100,7 +100,7 @@ fun CityScreen(cityId: String, navController: NavController) {
                 title = { Text("CityTripTide") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -218,7 +218,7 @@ fun CityScreen(cityId: String, navController: NavController) {
                             )
                         } else {
                             Image(
-                                painter = rememberImagePainter(c.imageUrl),
+                                painter = rememberAsyncImagePainter(c.imageUrl),
                                 contentDescription = c.name,
                                 modifier = Modifier
                                     .fillMaxWidth()

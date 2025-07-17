@@ -10,23 +10,23 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.google.firebase.auth.FirebaseAuth
+import androidx.core.content.edit
+import androidx.core.net.toUri
+import coil.compose.rememberAsyncImagePainter
 
 private const val PREFS_NAME = "profile_prefs"
 private const val KEY_IMAGE_URI_PREFIX = "profile_image_uri_"
@@ -45,7 +45,7 @@ fun ProfileScreen(navController: NavController) {
         if (userUid != null) {
             val savedUri = prefs.getString(KEY_IMAGE_URI_PREFIX + userUid, null)
             if (savedUri != null && imageUri == null) {
-                imageUri = Uri.parse(savedUri)
+                imageUri = savedUri.toUri()
             }
         }
     }
@@ -53,7 +53,7 @@ fun ProfileScreen(navController: NavController) {
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null && userUid != null) {
             imageUri = uri
-            prefs.edit().putString(KEY_IMAGE_URI_PREFIX + userUid, uri.toString()).apply()
+            prefs.edit { putString(KEY_IMAGE_URI_PREFIX + userUid, uri.toString()) }
         }
     }
 
@@ -79,7 +79,7 @@ fun ProfileScreen(navController: NavController) {
             ) {
                 if (imageUri != null) {
                     Image(
-                        painter = rememberImagePainter(
+                        painter = rememberAsyncImagePainter(
                             ImageRequest.Builder(context)
                                 .data(imageUri)
                                 .size(Size.ORIGINAL)

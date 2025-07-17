@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package devkonig.citytriptride
 
 import android.content.Context
@@ -13,7 +15,7 @@ object LocationUtils {
                 val geocoder = Geocoder(context, Locale.getDefault())
                 val addresses = geocoder.getFromLocation(latitude, longitude, 1)
                 addresses?.firstOrNull()?.getAddressLine(0)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }
