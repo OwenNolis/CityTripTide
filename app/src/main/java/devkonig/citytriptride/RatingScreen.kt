@@ -25,6 +25,7 @@ fun RatingScreen(
     var ratings by remember { mutableStateOf<List<CityRating>>(emptyList()) }
     var ratingsLoading by remember { mutableStateOf(false) }
     var sightRatingsMap by remember { mutableStateOf<Map<String, Map<String, Double>>>(emptyMap()) }
+    var sightRatingsListMap by remember { mutableStateOf<Map<String, Map<String, List<SightRating>>>>(emptyMap()) }
 
     // Filter out the default/empty city
     val filteredCities = cities.filter {
@@ -69,16 +70,24 @@ fun RatingScreen(
                 .get()
                 .addOnSuccessListener { snapshot ->
                     val ratingsBySight = mutableMapOf<String, MutableList<Int>>()
+                    val ratingsListBySight = mutableMapOf<String, MutableList<SightRating>>()
                     snapshot.documents.forEach { doc ->
                         val sightName = doc.getString("sightName") ?: return@forEach
                         val rating = doc.getLong("rating")?.toInt() ?: return@forEach
                         ratingsBySight.getOrPut(sightName) { mutableListOf() }.add(rating)
+                        val sightRating = doc.toObject(SightRating::class.java)
+                        if (sightRating != null) {
+                            ratingsListBySight.getOrPut(sightName) { mutableListOf() }.add(sightRating)
+                        }
                     }
                     val avgMap = ratingsBySight.mapValues { (_, ratings) ->
                         if (ratings.isNotEmpty()) ratings.average() else 0.0
                     }
                     sightRatingsMap = sightRatingsMap.toMutableMap().apply {
                         put(expandedCityId!!, avgMap)
+                    }
+                    sightRatingsListMap = sightRatingsListMap.toMutableMap().apply {
+                        put(expandedCityId!!, ratingsListBySight)
                     }
                 }
         } else {
@@ -162,6 +171,7 @@ fun RatingScreen(
                                 Text("Sights:", style = MaterialTheme.typography.subtitle1)
                                 city.sights.forEach { sight ->
                                     val avgRating = sightRatingsMap[cityWithId.id]?.get(sight.name) ?: 0.0
+                                    val sightRatingsList = sightRatingsListMap[cityWithId.id]?.get(sight.name) ?: emptyList()
                                     Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -171,6 +181,7 @@ fun RatingScreen(
                                         if (avgRating > 0.0) {
                                             Text(
                                                 text = "Average Rating: ${"%.1f".format(avgRating)}",
+                                                fontWeight = FontWeight.Bold,
                                                 style = MaterialTheme.typography.caption,
                                                 modifier = Modifier.padding(start = 8.dp)
                                             )
@@ -179,6 +190,13 @@ fun RatingScreen(
                                                 text = "No ratings yet.",
                                                 style = MaterialTheme.typography.caption,
                                                 modifier = Modifier.padding(start = 8.dp)
+                                            )
+                                        }
+                                        sightRatingsList.forEach { r ->
+                                            Text(
+                                                text = "${r.userId}: ${r.comment} (${r.rating}/5)",
+                                                style = MaterialTheme.typography.caption,
+                                                modifier = Modifier.padding(start = 16.dp, top = 2.dp)
                                             )
                                         }
                                     }
