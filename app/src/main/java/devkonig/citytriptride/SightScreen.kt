@@ -30,6 +30,7 @@ import com.google.firebase.auth.FirebaseAuth
 @SuppressLint("AutoboxingStateCreation")
 @Composable
 fun SightScreen(cityId: String, sightName: String, navController: NavController) {
+    // State variables
     var sight by remember { mutableStateOf<Sight?>(null) }
     var isEditing by remember { mutableStateOf(false) }
     var editedName by remember { mutableStateOf("") }
@@ -106,6 +107,7 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
             }
     }
 
+    // Main UI
     Scaffold(
         topBar = {
             TopAppBar(
@@ -184,6 +186,7 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                                         }
                                     }
                                 ) {
+                                    // Toggle favorite icon
                                     Icon(
                                         imageVector = if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
                                         contentDescription = if (isFavorite) "Unfavorite" else "Favorite",
@@ -192,6 +195,7 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                                 }
                                 Spacer(modifier = Modifier.width(4.dp))
                             }
+                            // Edit button
                             if (isEditing) {
                                 Button(
                                     onClick = {
@@ -326,10 +330,12 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                                 style = MaterialTheme.typography.body2
                             )
                         }
+                        // Display error message if any
                         if (errorMessage != null) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(errorMessage!!, color = MaterialTheme.colors.error)
                         }
+                        // --- Sight ratings section ---
                         if (!isEditing) {
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(onClick = { showRatingDialog = true }) {
@@ -344,6 +350,7 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                             )
                         }
                     }
+                    // --- Sight ratings list ---
                     items(sightRatings) { r ->
                         Card(
                             modifier = Modifier
@@ -401,6 +408,7 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                         Text(if (isDeleting) "Deleting..." else "Delete", color = Color.White)
                     }
                 }
+                // Display error message if any
                 if (errorMessage != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(errorMessage!!, color = MaterialTheme.colors.error)
@@ -445,6 +453,7 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                                         "cityId" to cityId,
                                         "sightName" to sightName
                                     )
+                                    // Save rating to Firestore
                                     db.collection("cities").document(cityId)
                                         .collection("sightRatings")
                                         .document("${userId}_$sightName")
