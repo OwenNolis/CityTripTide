@@ -17,6 +17,7 @@ import com.google.firebase.firestore.GeoPoint
 
 @Composable
 fun AddSightScreen(cityId: String, navController: NavController) {
+    // State variables for the form fields
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var latitude by remember { mutableStateOf("") }
@@ -26,6 +27,7 @@ fun AddSightScreen(cityId: String, navController: NavController) {
     var isSaving by remember { mutableStateOf(false) }
     var showDuplicateDialog by remember { mutableStateOf(false) }
 
+    // Scaffold to provide the top app bar and content padding
     Scaffold(
         topBar = {
             TopAppBar(
@@ -45,16 +47,19 @@ fun AddSightScreen(cityId: String, navController: NavController) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // Input fields for sight details
             TextField(value = name, onValueChange = { name = it }, label = { Text("Sight Name") })
             TextField(value = description, onValueChange = { description = it }, label = { Text("Description") })
             TextField(value = latitude, onValueChange = { latitude = it }, label = { Text("Latitude") })
             TextField(value = longitude, onValueChange = { longitude = it }, label = { Text("Longitude") })
             TextField(value = imageUrl, onValueChange = { imageUrl = it }, label = { Text("Image URL") })
 
+            // Display error message if any
             if (errorMessage != null) {
                 Text(errorMessage!!, color = MaterialTheme.colors.error)
             }
 
+            // Save button
             Button(
                 onClick = {
                     val lat = latitude.toDoubleOrNull()
@@ -106,6 +111,7 @@ fun AddSightScreen(cityId: String, navController: NavController) {
                 Text(if (isSaving) "Saving..." else "Save")
             }
 
+            // Show duplicate dialog if a sight with the same name exists
             if (showDuplicateDialog) {
                 AlertDialog(
                     onDismissRequest = { showDuplicateDialog = false },
