@@ -17,8 +17,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
@@ -45,6 +43,11 @@ fun CityScreen(cityId: String, navController: NavController) {
     var isSubmitting by remember { mutableStateOf(false) }
     var ratingError by remember { mutableStateOf<String?>(null) }
 
+    // --- City ratings state ---
+    var cityRatings by remember { mutableStateOf<List<CityRating>>(emptyList()) }
+    var ratingsLoading by remember { mutableStateOf(false) }
+    var averageCityRating by remember { mutableStateOf(0.0) }
+
     // Load city data
     LaunchedEffect(cityId) {
         FirebaseFirestore.getInstance()
@@ -67,6 +70,28 @@ fun CityScreen(cityId: String, navController: NavController) {
                     isFavorite = doc.exists()
                 }
         }
+    }
+
+    // Fetch city ratings
+    LaunchedEffect(cityId, showRatingDialog) {
+        ratingsLoading = true
+        FirebaseFirestore.getInstance()
+            .collection("cities").document(cityId)
+            .collection("ratings")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val ratingsList = snapshot.documents.mapNotNull { it.toObject(CityRating::class.java) }
+                cityRatings = ratingsList
+                averageCityRating = if (ratingsList.isNotEmpty()) {
+                    ratingsList.map { it.rating }.average()
+                } else 0.0
+                ratingsLoading = false
+            }
+            .addOnFailureListener {
+                cityRatings = emptyList()
+                averageCityRating = 0.0
+                ratingsLoading = false
+            }
     }
 
     Scaffold(
@@ -117,7 +142,6 @@ fun CityScreen(cityId: String, navController: NavController) {
                                     modifier = Modifier.weight(1f)
                                 )
                             }
-                            // Star icon between title and Edit button
                             IconButton(
                                 onClick = {
                                     if (userId != null) {
@@ -230,7 +254,6 @@ fun CityScreen(cityId: String, navController: NavController) {
                                 style = MaterialTheme.typography.body1
                             )
                             Spacer(modifier = Modifier.height(20.dp))
-                            // --- Latitude, Longitude, and Give Rating Button Row ---
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth()
@@ -249,6 +272,33 @@ fun CityScreen(cityId: String, navController: NavController) {
                                 }
                                 Button(onClick = { showRatingDialog = true }) {
                                     Text("Give rating")
+                                }
+                            }
+                            // --- City ratings display ---
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Average City Rating: ${"%.1f".format(averageCityRating)}",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                            if (ratingsLoading) {
+                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                            } else if (cityRatings.isEmpty()) {
+                                Text("No ratings yet.", style = MaterialTheme.typography.body2)
+                            } else {
+                                cityRatings.forEach { r ->
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                    ) {
+                                        Column(modifier = Modifier.padding(8.dp)) {
+                                            Text("Rating: ${r.rating}", fontWeight = FontWeight.Bold)
+                                            Text("Comment: ${r.comment}")
+                                            Text("User: ${r.userId}", style = MaterialTheme.typography.caption)
+                                        }
+                                    }
                                 }
                             }
                         }
