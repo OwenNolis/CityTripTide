@@ -69,6 +69,7 @@ fun FavoriteListScreen(navController: NavController) {
         }
     }
 
+    // Show the favorite cities and their favorite sights
     Scaffold(
         topBar = {
             TopAppBar(
