@@ -38,6 +38,15 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
     val userId = FirebaseAuth.getInstance().currentUser?.uid
     var isFavorite by remember { mutableStateOf(false) }
 
+    // --- Sight rating state ---
+    var showRatingDialog by remember { mutableStateOf(false) }
+    var sightRating by remember { mutableStateOf(0) }
+    var sightComment by remember { mutableStateOf("") }
+    var isSubmittingRating by remember { mutableStateOf(false) }
+    var ratingError by remember { mutableStateOf<String?>(null) }
+    var sightRatings by remember { mutableStateOf<List<SightRating>>(emptyList()) }
+    var averageSightRating by remember { mutableStateOf(0.0) }
+
     // Check if sight is favorite
     LaunchedEffect(cityId, sightName, userId) {
         if (userId != null) {
@@ -71,6 +80,22 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                         imageUrl = it["imageUrl"] as? String ?: ""
                     )
                 }
+            }
+    }
+
+    // Fetch sight ratings
+    LaunchedEffect(cityId, sightName, showRatingDialog) {
+        FirebaseFirestore.getInstance()
+            .collection("cities").document(cityId)
+            .collection("sightRatings")
+            .whereEqualTo("sightName", sightName)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val ratingsList = snapshot.documents.mapNotNull { it.toObject(SightRating::class.java) }
+                sightRatings = ratingsList
+                averageSightRating = if (ratingsList.isNotEmpty()) {
+                    ratingsList.map { it.rating }.average()
+                } else 0.0
             }
     }
 
@@ -296,6 +321,33 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(errorMessage!!, color = MaterialTheme.colors.error)
                     }
+
+                    // --- Sight rating UI ---
+                    if (!isEditing) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { showRatingDialog = true }) {
+                            Text("Rate Sight")
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Average Rating: ${"%.1f".format(averageSightRating)}",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                        sightRatings.forEach { r ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(8.dp)) {
+                                    Text("Rating: ${r.rating}", fontWeight = FontWeight.Bold)
+                                    Text("Comment: ${r.comment}")
+                                }
+                            }
+                        }
+                    }
                 }
                 // Delete button at the bottom
                 if (!isEditing) {
@@ -339,6 +391,73 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                     ) {
                         Text(if (isDeleting) "Deleting..." else "Delete", color = Color.White)
                     }
+                }
+                // --- Sight rating dialog ---
+                if (showRatingDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showRatingDialog = false },
+                        title = { Text("Rate Sight") },
+                        text = {
+                            Column {
+                                HeartRatingBar(rating = sightRating, onRatingChanged = { sightRating = it })
+                                OutlinedTextField(
+                                    value = sightComment,
+                                    onValueChange = { sightComment = it },
+                                    label = { Text("Your comment") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                if (ratingError != null) {
+                                    Text(ratingError!!, color = MaterialTheme.colors.error)
+                                }
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    if (userId == null) {
+                                        ratingError = "You must be logged in."
+                                        return@Button
+                                    }
+                                    if (sightRating == 0) {
+                                        ratingError = "Please select a rating."
+                                        return@Button
+                                    }
+                                    isSubmittingRating = true
+                                    ratingError = null
+                                    val db = FirebaseFirestore.getInstance()
+                                    val ratingObj = mapOf(
+                                        "userId" to userId,
+                                        "rating" to sightRating,
+                                        "comment" to sightComment,
+                                        "cityId" to cityId,
+                                        "sightName" to sightName
+                                    )
+                                    db.collection("cities").document(cityId)
+                                        .collection("sightRatings")
+                                        .document("${userId}_$sightName")
+                                        .set(ratingObj)
+                                        .addOnSuccessListener {
+                                            isSubmittingRating = false
+                                            showRatingDialog = false
+                                            sightRating = 0
+                                            sightComment = ""
+                                        }
+                                        .addOnFailureListener { e ->
+                                            ratingError = "Failed to submit: ${e.message}"
+                                            isSubmittingRating = false
+                                        }
+                                },
+                                enabled = !isSubmittingRating
+                            ) {
+                                Text(if (isSubmittingRating) "Submitting..." else "Submit")
+                            }
+                        },
+                        dismissButton = {
+                            OutlinedButton(onClick = { showRatingDialog = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
                 }
             }
         } ?: Box(
