@@ -16,10 +16,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun RatingScreen(
+    // This screen displays ratings for cities and their sights
     navController: NavController,
     currentRoute: String?,
     viewModel: MapViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    // Collect cities from the ViewModel
     val cities by viewModel.cities.collectAsState()
     var expandedCityId by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
@@ -96,6 +98,7 @@ fun RatingScreen(
         }
     }
 
+    // Main UI
     Scaffold(
         topBar = {
             TopAppBar(
