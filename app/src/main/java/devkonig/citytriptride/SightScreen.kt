@@ -2,6 +2,8 @@ package devkonig.citytriptride
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -122,235 +124,236 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                     .padding(16.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Column {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        if (isEditing) {
-                            TextField(
-                                value = editedName,
-                                onValueChange = { editedName = it },
-                                label = { Text("Sight Name") },
-                                modifier = Modifier.weight(1f)
-                            )
-                        } else {
-                            Text(
-                                text = s.name,
-                                fontSize = 28.sp,
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.h5,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        // Favorite star icon (only when not editing)
-                        if (!isEditing) {
-                            IconButton(
-                                onClick = {
-                                    if (userId != null && sight != null) {
-                                        val db = FirebaseFirestore.getInstance()
-                                        val favSightRef = db.collection("users").document(userId)
-                                            .collection("favoriteSights").document("$cityId|$sightName")
-                                        val favCityRef = db.collection("users").document(userId)
-                                            .collection("favorites").document(cityId)
-                                        if (isFavorite) {
-                                            favSightRef.delete()
-                                                .addOnSuccessListener { isFavorite = false }
-                                        } else {
-                                            // Add city to favorites if not already
-                                            favCityRef.get().addOnSuccessListener { cityDoc ->
-                                                if (!cityDoc.exists()) {
-                                                    favCityRef.set(mapOf("timestamp" to System.currentTimeMillis()))
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    item {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (isEditing) {
+                                TextField(
+                                    value = editedName,
+                                    onValueChange = { editedName = it },
+                                    label = { Text("Sight Name") },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            } else {
+                                Text(
+                                    text = s.name,
+                                    fontSize = 28.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.h5,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            if (!isEditing) {
+                                IconButton(
+                                    onClick = {
+                                        if (userId != null && sight != null) {
+                                            val db = FirebaseFirestore.getInstance()
+                                            val favSightRef = db.collection("users").document(userId)
+                                                .collection("favoriteSights").document("$cityId|$sightName")
+                                            val favCityRef = db.collection("users").document(userId)
+                                                .collection("favorites").document(cityId)
+                                            if (isFavorite) {
+                                                favSightRef.delete()
+                                                    .addOnSuccessListener { isFavorite = false }
+                                            } else {
+                                                favCityRef.get().addOnSuccessListener { cityDoc ->
+                                                    if (!cityDoc.exists()) {
+                                                        favCityRef.set(mapOf("timestamp" to System.currentTimeMillis()))
+                                                    }
+                                                    favSightRef.set(
+                                                        mapOf(
+                                                            "cityId" to cityId,
+                                                            "sightName" to sightName,
+                                                            "timestamp" to System.currentTimeMillis()
+                                                        )
+                                                    ).addOnSuccessListener { isFavorite = true }
                                                 }
-                                                favSightRef.set(
-                                                    mapOf(
-                                                        "cityId" to cityId,
-                                                        "sightName" to sightName,
-                                                        "timestamp" to System.currentTimeMillis()
-                                                    )
-                                                ).addOnSuccessListener { isFavorite = true }
                                             }
                                         }
                                     }
+                                ) {
+                                    Icon(
+                                        imageVector = if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
+                                        contentDescription = if (isFavorite) "Unfavorite" else "Favorite",
+                                        tint = if (isFavorite) MaterialTheme.colors.primary else Color.Gray
+                                    )
                                 }
-                            ) {
-                                Icon(
-                                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Filled.StarBorder,
-                                    contentDescription = if (isFavorite) "Unfavorite" else "Favorite",
-                                    tint = if (isFavorite) MaterialTheme.colors.primary else Color.Gray
-                                )
+                                Spacer(modifier = Modifier.width(4.dp))
                             }
-                            Spacer(modifier = Modifier.width(4.dp))
-                        }
-                        if (isEditing) {
-                            Button(
-                                onClick = {
-                                    val lat = editedLatitude.toDoubleOrNull()
-                                    val lon = editedLongitude.toDoubleOrNull()
-                                    if (editedName.isBlank() || lat == null || lon == null) {
-                                        errorMessage = "Please fill all fields with valid values"
-                                        return@Button
-                                    }
-                                    isSaving = true
-                                    errorMessage = null
-                                    val db = FirebaseFirestore.getInstance()
-                                    val cityRef = db.collection("cities").document(cityId)
-                                    cityRef.get().addOnSuccessListener { doc ->
-                                        val sights = doc.get("sights") as? List<Map<String, Any>> ?: emptyList()
-                                        val oldSight = sights.firstOrNull {
-                                            (it["name"] as? String)?.trim()?.equals(s.name, ignoreCase = true) == true
+                            if (isEditing) {
+                                Button(
+                                    onClick = {
+                                        val lat = editedLatitude.toDoubleOrNull()
+                                        val lon = editedLongitude.toDoubleOrNull()
+                                        if (editedName.isBlank() || lat == null || lon == null) {
+                                            errorMessage = "Please fill all fields with valid values"
+                                            return@Button
                                         }
-                                        if (oldSight != null) {
-                                            val newSight = hashMapOf(
-                                                "name" to editedName,
-                                                "description" to editedDescription,
-                                                "location" to GeoPoint(lat, lon),
-                                                "imageUrl" to editedImageUrl
-                                            )
-                                            cityRef.update("sights", com.google.firebase.firestore.FieldValue.arrayRemove(oldSight))
-                                                .addOnSuccessListener {
-                                                    cityRef.update("sights", com.google.firebase.firestore.FieldValue.arrayUnion(newSight))
-                                                        .addOnSuccessListener {
-                                                            sight = Sight(
-                                                                name = editedName,
-                                                                description = editedDescription,
-                                                                location = GeoPoint(lat, lon),
-                                                                imageUrl = editedImageUrl
-                                                            )
-                                                            isEditing = false
-                                                            isSaving = false
-                                                        }
-                                                        .addOnFailureListener { e ->
-                                                            errorMessage = "Failed to update sight: ${e.message}"
-                                                            isSaving = false
-                                                        }
-                                                }
-                                                .addOnFailureListener { e ->
-                                                    errorMessage = "Failed to update sight: ${e.message}"
-                                                    isSaving = false
-                                                }
-                                        } else {
-                                            errorMessage = "Sight not found"
+                                        isSaving = true
+                                        errorMessage = null
+                                        val db = FirebaseFirestore.getInstance()
+                                        val cityRef = db.collection("cities").document(cityId)
+                                        cityRef.get().addOnSuccessListener { doc ->
+                                            val sights = doc.get("sights") as? List<Map<String, Any>> ?: emptyList()
+                                            val oldSight = sights.firstOrNull {
+                                                (it["name"] as? String)?.trim()?.equals(s.name, ignoreCase = true) == true
+                                            }
+                                            if (oldSight != null) {
+                                                val newSight = hashMapOf(
+                                                    "name" to editedName,
+                                                    "description" to editedDescription,
+                                                    "location" to GeoPoint(lat, lon),
+                                                    "imageUrl" to editedImageUrl
+                                                )
+                                                cityRef.update("sights", com.google.firebase.firestore.FieldValue.arrayRemove(oldSight))
+                                                    .addOnSuccessListener {
+                                                        cityRef.update("sights", com.google.firebase.firestore.FieldValue.arrayUnion(newSight))
+                                                            .addOnSuccessListener {
+                                                                sight = Sight(
+                                                                    name = editedName,
+                                                                    description = editedDescription,
+                                                                    location = GeoPoint(lat, lon),
+                                                                    imageUrl = editedImageUrl
+                                                                )
+                                                                isEditing = false
+                                                                isSaving = false
+                                                            }
+                                                            .addOnFailureListener { e ->
+                                                                errorMessage = "Failed to update sight: ${e.message}"
+                                                                isSaving = false
+                                                            }
+                                                    }
+                                                    .addOnFailureListener { e ->
+                                                        errorMessage = "Failed to update sight: ${e.message}"
+                                                        isSaving = false
+                                                    }
+                                            } else {
+                                                errorMessage = "Sight not found"
+                                                isSaving = false
+                                            }
+                                        }.addOnFailureListener { e ->
+                                            errorMessage = "Failed to update sight: ${e.message}"
                                             isSaving = false
                                         }
-                                    }.addOnFailureListener { e ->
-                                        errorMessage = "Failed to update sight: ${e.message}"
-                                        isSaving = false
+                                    },
+                                    enabled = !isSaving
+                                ) {
+                                    Text(if (isSaving) "Saving..." else "Save")
+                                }
+                            } else {
+                                IconButton(onClick = {
+                                    isEditing = true
+                                    editedName = s.name
+                                    editedDescription = s.description
+                                    editedLatitude = s.location.latitude.toString()
+                                    editedLongitude = s.location.longitude.toString()
+                                    editedImageUrl = s.imageUrl
+                                }) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text("Edit Sight", fontSize = 16.sp)
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Icon(Icons.Default.Edit, contentDescription = "Edit Sight")
                                     }
-                                },
-                                enabled = !isSaving
-                            ) {
-                                Text(if (isSaving) "Saving..." else "Save")
-                            }
-                        } else {
-                            IconButton(onClick = {
-                                isEditing = true
-                                editedName = s.name
-                                editedDescription = s.description
-                                editedLatitude = s.location.latitude.toString()
-                                editedLongitude = s.location.longitude.toString()
-                                editedImageUrl = s.imageUrl
-                            }) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("Edit Sight", fontSize = 16.sp)
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Icon(Icons.Default.Edit, contentDescription = "Edit Sight")
                                 }
                             }
                         }
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    if (isEditing) {
-                        TextField(
-                            value = editedImageUrl,
-                            onValueChange = { editedImageUrl = it },
-                            label = { Text("Image URL") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    } else if (s.imageUrl.isNotBlank()) {
-                        Image(
-                            painter = rememberImagePainter(s.imageUrl),
-                            contentDescription = s.name,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(1.5f)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    if (isEditing) {
-                        TextField(
-                            value = editedDescription,
-                            onValueChange = { editedDescription = it },
-                            label = { Text("Description") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        TextField(
-                            value = editedLatitude,
-                            onValueChange = { editedLatitude = it },
-                            label = { Text("Latitude") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        TextField(
-                            value = editedLongitude,
-                            onValueChange = { editedLongitude = it },
-                            label = { Text("Longitude") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    } else {
-                        Text(
-                            text = s.description,
-                            fontSize = 18.sp,
-                            style = MaterialTheme.typography.body1
-                        )
-                        Spacer(modifier = Modifier.height(20.dp))
-                        Text(
-                            text = "Latitude: ${s.location.latitude}",
-                            fontSize = 20.sp,
-                            style = MaterialTheme.typography.body1
-                        )
-                        Text(
-                            text = "Longitude: ${s.location.longitude}",
-                            fontSize = 20.sp,
-                            style = MaterialTheme.typography.body2
-                        )
-                    }
-                    if (errorMessage != null) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(errorMessage!!, color = MaterialTheme.colors.error)
-                    }
-
-                    // --- Sight rating UI ---
-                    if (!isEditing) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { showRatingDialog = true }) {
-                            Text("Rate Sight")
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Average Rating: ${"%.1f".format(averageSightRating)}",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                        sightRatings.forEach { r ->
-                            Card(
+                        Spacer(modifier = Modifier.height(6.dp))
+                        if (isEditing) {
+                            TextField(
+                                value = editedImageUrl,
+                                onValueChange = { editedImageUrl = it },
+                                label = { Text("Image URL") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        } else if (s.imageUrl.isNotBlank()) {
+                            Image(
+                                painter = rememberImagePainter(s.imageUrl),
+                                contentDescription = s.name,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                            ) {
-                                Column(modifier = Modifier.padding(8.dp)) {
-                                    Text("Rating: ${r.rating}", fontWeight = FontWeight.Bold)
-                                    Text("Comment: ${r.comment}")
-                                    Text("User: ${r.userId}", style = MaterialTheme.typography.caption)
-                                }
+                                    .aspectRatio(1.5f)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (isEditing) {
+                            TextField(
+                                value = editedDescription,
+                                onValueChange = { editedDescription = it },
+                                label = { Text("Description") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            TextField(
+                                value = editedLatitude,
+                                onValueChange = { editedLatitude = it },
+                                label = { Text("Latitude") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            TextField(
+                                value = editedLongitude,
+                                onValueChange = { editedLongitude = it },
+                                label = { Text("Longitude") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        } else {
+                            Text(
+                                text = s.description,
+                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.body1
+                            )
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Text(
+                                text = "Latitude: ${s.location.latitude}",
+                                fontSize = 20.sp,
+                                style = MaterialTheme.typography.body1
+                            )
+                            Text(
+                                text = "Longitude: ${s.location.longitude}",
+                                fontSize = 20.sp,
+                                style = MaterialTheme.typography.body2
+                            )
+                        }
+                        if (errorMessage != null) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(errorMessage!!, color = MaterialTheme.colors.error)
+                        }
+                        if (!isEditing) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = { showRatingDialog = true }) {
+                                Text("Rate Sight")
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Average Rating: ${"%.1f".format(averageSightRating)}",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                    }
+                    items(sightRatings) { r ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(8.dp)) {
+                                Text("Rating: ${r.rating}", fontWeight = FontWeight.Bold)
+                                Text("Comment: ${r.comment}")
+                                Text("User: ${r.userId}", style = MaterialTheme.typography.caption)
                             }
                         }
                     }
                 }
-                // Delete button at the bottom
+                // --- Delete button always at the bottom ---
                 if (!isEditing) {
                     Button(
                         onClick = {
@@ -393,7 +396,11 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                         Text(if (isDeleting) "Deleting..." else "Delete", color = Color.White)
                     }
                 }
-                // --- Sight rating dialog ---
+                if (errorMessage != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(errorMessage!!, color = MaterialTheme.colors.error)
+                }
+                // --- Rating dialog ---
                 if (showRatingDialog) {
                     AlertDialog(
                         onDismissRequest = { showRatingDialog = false },
