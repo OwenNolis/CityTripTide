@@ -62,6 +62,18 @@ fun ProfileScreen(navController: NavController) {
 
     // Scaffold to provide a top bar and bottom navigation
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("CityTripTide")
+                    }
+                }
+            )
+        },
         bottomBar = {
             BottomNavBar(navController, currentRoute = "profile")
         }
