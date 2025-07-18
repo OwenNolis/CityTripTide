@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun CityScreen(cityId: String, navController: NavController) {
@@ -294,6 +296,11 @@ fun CityScreen(cityId: String, navController: NavController) {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 4.dp)
+                                            .border(
+                                                width = 2.dp,
+                                                color = Color(0xFF444444).copy(alpha = 0.4f),
+                                                shape = MaterialTheme.shapes.medium
+                                            ),
                                     ) {
                                         Column(modifier = Modifier.padding(8.dp)) {
                                             Text("Rating: ${r.rating}", fontWeight = FontWeight.Bold)
@@ -351,13 +358,13 @@ fun CityScreen(cityId: String, navController: NavController) {
                                     isDeleting = false
                                 }
                         },
-                        colors = ButtonDefaults.buttonColors(backgroundColor = androidx.compose.ui.graphics.Color.Red),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 16.dp),
                         enabled = !isDeleting
                     ) {
-                        Text(if (isDeleting) "Deleting..." else "Delete", color = androidx.compose.ui.graphics.Color.White)
+                        Text(if (isDeleting) "Deleting..." else "Delete", color = Color.White)
                     }
                 }
                 // --- Error message display ---
