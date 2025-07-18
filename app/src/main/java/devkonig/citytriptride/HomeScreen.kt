@@ -18,6 +18,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.foundation.clickable
 import coil.compose.rememberAsyncImagePainter
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -84,7 +86,12 @@ fun HomeScreen(navController: NavController) {
                         Card(
                             modifier = Modifier
                                 .aspectRatio(1f)
-                                .clickable { navController.navigate("city/${cityWithId.id}") },
+                                .clickable { navController.navigate("city/${cityWithId.id}") }
+                                .border(
+                                    width = 2.dp,
+                                    color = Color(0xFF444444).copy(alpha = 0.4f), // subtle dark gray with lower opacity
+                                    shape = MaterialTheme.shapes.medium
+                                ),
                             elevation = 4.dp
                         ) {
                             Column(
