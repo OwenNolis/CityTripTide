@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -22,7 +23,14 @@ fun WelcomeScreen(
         Text(
             text = "CityTripTide",
             style = MaterialTheme.typography.h4,
-            modifier = Modifier.padding(bottom = 32.dp)
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+        Divider(
+            color = Color(0xFF444444).copy(alpha = 0.2f),
+            thickness = 1.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 8.dp)
         )
         Button(
             onClick = onNavigateToSignup,
