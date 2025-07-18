@@ -9,6 +9,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
+import androidx.compose.ui.graphics.Color
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -28,6 +29,18 @@ fun LoginScreen(
             .padding(32.dp),
         verticalArrangement = Arrangement.Center
     ) {
+        Text(
+            text = "CityTripTide",
+            style = MaterialTheme.typography.h4,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+        Divider(
+            color = Color(0xFF444444).copy(alpha = 0.2f),
+            thickness = 1.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 8.dp)
+        )
         TextField(
             value = email,
             onValueChange = { email = it },
