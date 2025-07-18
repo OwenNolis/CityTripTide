@@ -4,6 +4,7 @@ package devkonig.citytriptride
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -356,6 +357,11 @@ fun SightScreen(cityId: String, sightName: String, navController: NavController)
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
+                                .border(
+                                    width = 2.dp,
+                                    color = Color(0xFF444444).copy(alpha = 0.4f),
+                                    shape = MaterialTheme.shapes.medium
+                                ),
                         ) {
                             Column(modifier = Modifier.padding(8.dp)) {
                                 Text("Rating: ${r.rating}", fontWeight = FontWeight.Bold)
