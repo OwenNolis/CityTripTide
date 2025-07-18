@@ -69,7 +69,14 @@ fun HomeScreen(navController: NavController) {
                 Text(
                     text = "CityTripTide",
                     style = MaterialTheme.typography.h4,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Divider(
+                    color = Color(0xFF444444).copy(alpha = 0.2f),
+                    thickness = 1.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 )
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
