@@ -36,7 +36,6 @@ At least one screen in the app displays a list of locations.
 At least one screen in the app displays locations on a map.
 
 
-## Nice to Have
 ### Unlimited Cities:
 Add as many cities as you want to the app.
 
