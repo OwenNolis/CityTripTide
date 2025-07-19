@@ -7,7 +7,7 @@ A City Trip App that will guide you in your adventures.
 CityTripTide is a mobile app designed to enhance your city trip experience. Discover and share interesting places such as restaurants, hotels, and attractions with other users during your travels.
 
 ### URL Video Link:
-
+https://ap.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=a4a1456c-c8f5-4237-b678-b31f01308216
 
 
 ### Core Features
